@@ -164,7 +164,7 @@ g = G(
 g.write(start_script_string)
 
 #specific to the mold
-mold_z_zero = -76
+mold_z_zero = -69
 mold_zero_offset = 1.0
 
 #misc printer parameters
@@ -174,20 +174,20 @@ z_axis = "z"
 #spiral parameters
 n_points = 1000     #number of points to discretize the helix in to
 start_radius = 0.5
-n_spirals = 36
+n_spirals = 50
 factor=1         # discretization factor. Influences the effect of the arctan scaling of discretization.
 
 #other dimensions
 stem_length = 1    # connection to needle insertion
 pad_length = 2     # needle insertion
-travel_height = mold_z_zero+10   # safe travel height (abs)
+travel_height = mold_z_zero+20   # safe travel height (abs)
 
 #feeds and speeds
 pressure = 90             # (psi) line pressure to ink nozzle
-matrix_travel_speed = 1   # (in mm/s) travel in matrix speed
-stem_print_speed = 1      # (in mm/s) stem (needle insertion) print speed
+matrix_travel_speed = 0.75   # (in mm/s) travel in matrix speed
+stem_print_speed = 0.5      # (in mm/s) stem (needle insertion) print speed
 air_travel_speed = 20     # (in mms) air travel
-print_speed = 0.5         # (in mm/s) helix print speed
+print_speed = 1           # (in mm/s) helix print speed
 
 g.write(
 """
@@ -205,23 +205,28 @@ VELOCITY ON ; interpolate velocities instead of starting and stopping
 g.set_pressure(com_port, pressure)
 
 #array parameters
-n_rows = 4
+n_rows = 5
 radius_decrease_per_row = 0.5
 
-n_cols = 4
-n_spirals_decrease_per_col = 10
+n_cols = 6
+n_spirals_decrease_per_col = 9
 
-spiral_sep_dist = 2 # separation between spiral edges
+spiral_sep_dist = 3 # separation between spiral edges
 max_radius = start_radius+radius_decrease_per_row*(n_rows-1)
-col_spacing = spiral_sep_dist + 2*(max_radius)
+col_spacing = spiral_sep_dist + (max_radius+start_radius)
 center_height = mold_z_zero+mold_zero_offset+max_radius
+increasing_radius = 0
 
 for col in range(n_cols):             #loop through columns (right, posative in X)
     n_spirals = n_spirals-n_spirals_decrease_per_col  #the number of spirals decreases across columns
     y_counter=0
+    increasing_radius = (not increasing_radius)
     for row in range(n_rows): #loop through rows (down, negative in Y)
-        radius=start_radius+radius_decrease_per_row*row    # decrease radius each row 
-
+        if (increasing_radius):
+            radius = start_radius+radius_decrease_per_row*row    # decrease radius each row 
+        else:
+            radius = start_radius+radius_decrease_per_row*((n_rows-1)-row)
+            
         #make the spiral
         theta = np.linspace(-np.arctan(factor),np.arctan(factor), n_points)
         theta_discretized = (factor+np.tan(theta))*(np.pi/(2*factor))
@@ -244,10 +249,12 @@ for col in range(n_cols):             #loop through columns (right, posative in 
         g.move(**{z_axis:(base_height)}) #safe height above bottom of mold
         g.relative();
         g.write("Incremental")
+        g.dwell(0.5)
             
         #make a sphere helix
         g.feed(print_speed)         # set print speed
         g.toggle_pressure(com_port) # start extrusion
+        g.dwell(0.5)
         relativePoints = pts[1:]-pts[:-1]
         for relPoint in relativePoints:
             g.move(x=relPoint[0], y=relPoint[1],  **{z_axis:relPoint[2]})
@@ -268,7 +275,7 @@ for col in range(n_cols):             #loop through columns (right, posative in 
         g.toggle_pressure(com_port)
         
         #move down to next col
-        dist_to_next_row = 2*radius+radius_decrease_per_row+spiral_sep_dist
+        dist_to_next_row = 2*radius+(1 if (increasing_radius==1) else -1)*radius_decrease_per_row+spiral_sep_dist
         g.move(y=dist_to_next_row)
         y_counter=y_counter+dist_to_next_row
         
