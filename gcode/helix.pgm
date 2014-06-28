@@ -1,22 +1,9 @@
-# -*- coding: utf-8 -*-
-from mecode import G
-from math import sqrt
+G91
 
-import numpy as np
-import matplotlib.pyplot as plt
-
-g = G(
-    print_lines=False,
-    outfile=r"H:\User Files\Fitzgerald\SoftRobots\PressureChamber\gcode\helix.pgm",
-    aerotech_include=False,
-)
-
-g.write("""
 ; Helix G Code
 ; Daniel Fitzgerald
 ; 06-20-2014
 ; helix conforming to the surface of a sphere to act as a pressure chamber with a large surface area.
-  
 
 DVAR $hFile        
 DVAR $cCheck
@@ -50,63 +37,8 @@ ENABLE X Y A B C D U     ; enables all the axis
 
 Incremental                ; “Incremental” tells the printer to referring to relative coordinates
 
-""")
-
-#specific to the mold
-mold_z_zero = -76
-mold_zero_offset = 1.0
 
 
-#misc. printing parameters
-com_port = 9
-z_axis = "A"
-pressure = 90
-
-#starting position to offset helix in absolute cooridnates
-#x_start = 100
-#y_start = 100
-#z_start = 10
-
-#spiral parameters
-N_points = 1000 #number of points to discretize the helix in to
-radius = 2.5
-N_spirals = 36
-factor=1 # discretization factor. Influences the effect of the arctan scaling of discretization.
-
-#theta = np.linspace(-np.pi/4, np.pi/4, N_points)
-theta = np.linspace(-np.arctan(factor),np.arctan(factor), N_points)
-
-#theta_discretized = (1+np.tan(theta))*(np.pi/2)
-theta_discretized = (factor+np.tan(theta))*(np.pi/(2*factor))
-
-#spherical archemeded spiral
-phi = N_spirals*2*theta_discretized
-x = radius*np.sin(theta_discretized) * np.cos(phi)
-y = radius*np.sin(theta_discretized) * np.sin(phi)
-z = -radius*np.cos(theta_discretized)
-
-pts = np.vstack((x, y, z))
-pts = pts.T
-
-#height of each point
-#heights = ((2*sphere_radius)*(i/N_points)) for i in range(N_points)
-
-#radius in the XY plane to the perimeter of the sphere from the vertical line through its center
-#radii = (x*(2*sphere_radius-x) for x in range(N_points)
-
-#other dimensions
-stem_length = 1 # connection to needle insertion
-pad_length = 2 # needle insertion
-lift_height = 10
-
-#feeds and speeds
-matrix_travel_speed = 1 # (in mm/s) travel in matrix speed
-stem_print_speed = 1 # (in mm/s) stem (needle insertion) print speed
-air_travel_speed = 20 # (in mms) air travel
-print_speed = 0.5 #in (mm/s) helix print speed
-
-g.write(
-"""
 ; start pressure chamber (spherical Archimedes spiral)
 
 ;-----------------------------------------------------------------------
@@ -115,57 +47,123 @@ g.write(
 
 
 VELOCITY ON ; interpolate velocities instead of starting and stopping
-"""
-)
 
-g.set_pressure(com_port, pressure)
+Call setPress P9 Q90
+G90
+ABSOLUTE
+F1
+G1 z-75.000000
+G91
+Incremental
+F0.5
+Call togglePress P9
+G1 X-0.004771 Y0.024058 z0.000602
+G1 X-0.040751 Y-0.040063 z0.001732
+G1 X0.075204 Y-0.048692 z0.002759
+G1 X0.053305 Y0.107362 z0.003692
+G1 X-0.135431 Y0.059290 z0.004538
+G1 X-0.070270 Y-0.158735 z0.005307
+G1 X0.176172 Y-0.088720 z0.006005
+G1 X0.115873 Y0.185775 z0.006638
+G1 X-0.184645 Y0.151479 z0.007212
+G1 X-0.193432 Y-0.169252 z0.007733
+G1 X0.136120 Y-0.237411 z0.008205
+G1 X0.276719 Y0.082901 z0.008633
+G1 X-0.009719 Y0.302597 z0.009020
+G1 X-0.305252 Y0.079450 z0.009371
+G1 X-0.175776 Y-0.275707 z0.009689
+G1 X0.208398 Y-0.265476 z0.009977
+G1 X0.331130 Y0.104040 z0.010237
+G1 X0.028003 Y0.354713 z0.010473
+G1 X-0.322158 Y0.168912 z0.010685
+G1 X-0.292156 Y-0.228613 z0.010877
+G1 X0.082892 Y-0.368313 z0.011051
+G1 X0.372583 Y-0.090755 z0.011207
+G1 X0.255232 Y0.293396 z0.011348
+G1 X-0.139465 Y0.368245 z0.011475
+G1 X-0.393985 Y0.057814 z0.011590
+G1 X-0.248989 Y-0.315884 z0.011693
+G1 X0.146066 Y-0.378649 z0.011785
+G1 X0.402553 Y-0.073026 z0.011868
+G1 X0.277515 Y0.304626 z0.011942
+G1 X-0.107206 Y0.400654 z0.012009
+G1 X-0.396049 Y0.130996 z0.012068
+G1 X-0.331061 Y-0.257332 z0.012121
+G1 X0.025682 Y-0.420465 z0.012169
+G1 X0.361216 Y-0.220091 z0.012211
+G1 X0.389791 Y0.168218 z0.012248
+G1 X0.091316 Y0.416023 z0.012281
+G1 X-0.283093 Y0.319883 z0.012311
+G1 X-0.426600 Y-0.037620 z0.012337
+G1 X-0.225902 Y-0.364965 z0.012359
+G1 X0.155177 Y-0.401100 z0.012379
+G1 X0.413683 Y-0.120275 z0.012396
+G1 X0.348226 Y0.254739 z0.012411
+G1 X0.012268 Y0.431831 z0.012423
+G1 X-0.333098 Y0.275818 z0.012434
+G1 X-0.423049 Y-0.091603 z0.012443
+G1 X-0.190358 Y-0.389092 z0.012450
+G1 X0.186848 Y-0.391051 z0.012455
+G1 X0.422569 Y-0.097020 z0.012459
+G1 X0.339164 Y0.270243 z0.012461
+G1 X-0.000000 Y0.433696 z0.012462
+G1 X-0.339164 Y0.270243 z0.012461
+G1 X-0.422569 Y-0.097020 z0.012459
+G1 X-0.186848 Y-0.391051 z0.012455
+G1 X0.190358 Y-0.389092 z0.012450
+G1 X0.423049 Y-0.091603 z0.012443
+G1 X0.333098 Y0.275818 z0.012434
+G1 X-0.012268 Y0.431831 z0.012423
+G1 X-0.348226 Y0.254739 z0.012411
+G1 X-0.413683 Y-0.120275 z0.012396
+G1 X-0.155177 Y-0.401100 z0.012379
+G1 X0.225902 Y-0.364965 z0.012359
+G1 X0.426600 Y-0.037620 z0.012337
+G1 X0.283093 Y0.319883 z0.012311
+G1 X-0.091316 Y0.416023 z0.012281
+G1 X-0.389791 Y0.168218 z0.012248
+G1 X-0.361216 Y-0.220091 z0.012211
+G1 X-0.025682 Y-0.420465 z0.012169
+G1 X0.331061 Y-0.257332 z0.012121
+G1 X0.396049 Y0.130996 z0.012068
+G1 X0.107206 Y0.400654 z0.012009
+G1 X-0.277515 Y0.304626 z0.011942
+G1 X-0.402553 Y-0.073026 z0.011868
+G1 X-0.146066 Y-0.378649 z0.011785
+G1 X0.248989 Y-0.315884 z0.011693
+G1 X0.393985 Y0.057814 z0.011590
+G1 X0.139465 Y0.368245 z0.011475
+G1 X-0.255232 Y0.293396 z0.011348
+G1 X-0.372583 Y-0.090755 z0.011207
+G1 X-0.082892 Y-0.368313 z0.011051
+G1 X0.292156 Y-0.228613 z0.010877
+G1 X0.322158 Y0.168912 z0.010685
+G1 X-0.028003 Y0.354713 z0.010473
+G1 X-0.331130 Y0.104040 z0.010237
+G1 X-0.208398 Y-0.265476 z0.009977
+G1 X0.175776 Y-0.275707 z0.009689
+G1 X0.305252 Y0.079450 z0.009371
+G1 X0.009719 Y0.302597 z0.009020
+G1 X-0.276719 Y0.082901 z0.008633
+G1 X-0.136120 Y-0.237411 z0.008205
+G1 X0.193432 Y-0.169252 z0.007733
+G1 X0.184645 Y0.151479 z0.007212
+G1 X-0.115873 Y0.185775 z0.006638
+G1 X-0.176172 Y-0.088720 z0.006005
+G1 X0.070270 Y-0.158735 z0.005307
+G1 X0.135431 Y0.059290 z0.004538
+G1 X-0.053305 Y0.107362 z0.003692
+G1 X-0.075204 Y-0.048692 z0.002759
+G1 X0.040751 Y-0.040063 z0.001732
+G1 X0.004771 Y0.024058 z0.000602
+G1 z1.000000
+F1
+G1 z2.000000
+G1 z10.000000
+Call togglePress P9
+G1 Y-3.500000
+G1 X3.500000 Y1.000000
 
-#go to mold zero
-g.absolute();
-g.write("ABSOLUTE")
-g.feed(matrix_travel_speed) # safe immersion speed
-g.move(**{z_axis:(mold_z_zero+mold_zero_offset)})
-g.relative();
-g.write("Incremental")
-
-#relative coordinates
-
-#g.move(**{z_axis:(-2*radius-stem_length-pad_length)}) # go to bottom of sphere
-
-#start sphere
-g.feed(print_speed) # set print speed
-g.toggle_pressure(com_port) # start extrusion
-relativePoints = pts[1:]-pts[:-1]
-for relPoint in relativePoints:
-    g.move(x=relPoint[0], y=relPoint[1],  **{z_axis:relPoint[2]})
-
-#top connector
-g.move(**{z_axis:stem_length}) # print the connection to the stem
-
-#needle insertion stem
-g.feed(stem_print_speed)
-g.move(**{z_axis:pad_length})
-
-#g.feed(matrix_travel_speed)
-g.move(**{z_axis:lift_height})
-
-#stop extrusion
-g.toggle_pressure(com_port)
-
-#absolute
-#g.absolute()
-#for point in pts:
-#    g.abs_move(x=point[0], y=point[1], Z=point[2])
-    
-#jog Z up
-#g.feed(1000)
-#g.relative()
-#g.move(z=(10))   # clear the print
-#g.absolute() 
-#g.write("G28 X0 ; home X axis")    
-    
-g.write(
-"""
 VELOCITY OFF
 
 M2
@@ -223,11 +221,11 @@ DFS setPress
 
 	$strtask3 = makestring "{#H}" $cCheck   
 	$strtask3 = STRUPR( $strtask3 )
-	$strtask2 = "\x02" + $strtask2 + $strtask3 + "\x03"
+	$strtask2 = "" + $strtask2 + $strtask3 + ""
             
-	FILEWRITE $hFile "\x05"
+	FILEWRITE $hFile ""
 	FILEWRITE $hFile $strtask2
-	FILEWRITE $hFile "\x04"
+	FILEWRITE $hFile ""
 
 	FILECLOSE $hFile
 
@@ -263,11 +261,11 @@ DFS togglePress
 
 	$strtask3 = makestring "{#H}" $cCheck   
 	$strtask3 = STRUPR( $strtask3 )
-	$strtask2 = "\x02" + $strtask2 + $strtask3 + "\x03"
+	$strtask2 = "" + $strtask2 + $strtask3 + ""
                   
-	FILEWRITE $hFile "\x05"
+	FILEWRITE $hFile ""
 	FILEWRITE $hFile $strtask2
-	FILEWRITE $hFile "\x04"
+	FILEWRITE $hFile ""
 
 	FILECLOSE $hFile
 
@@ -275,8 +273,4 @@ ENDDFS
 ;----------------------------------------------------------
 ;----------------------------------------------------------
 ;----------------------------------------------------------
-""")    
-    
-g.view()
 
-g.teardown()
